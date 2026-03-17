@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Everlasting — Premium Event Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&family=Tenor+Sans&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --gold:#BF9B30;--gold-hi:#D4AF44;--gold-lo:#8A7020;
+      --gold-bg:rgba(191,155,48,0.06);--gold-line:rgba(191,155,48,0.15);
+      --ink:#0B0B09;--ink2:#131310;--ink3:#1A1A16;--ink4:#222219;
+      --text:#E2DDD0;--muted:#8A8578;--faint:#3A3930;--white:#F8F4EC;
+      --ease:cubic-bezier(.23,.46,.45,.94);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--ink);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+    ::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--gold-lo)}
+
+    /* CURSOR */
+    #cur,#cur2{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0}
+    #cur{width:8px;height:8px;background:var(--gold);transform:translate(-50%,-50%);transition:transform .12s}
+    #cur2{width:32px;height:32px;border:1px solid rgba(191,155,48,.4);transform:translate(-50%,-50%);transition:all .18s ease;mix-blend-mode:difference}
+    body.hov #cur{transform:translate(-50%,-50%) scale(2.8)}
+    body.hov #cur2{transform:translate(-50%,-50%) scale(1.4);opacity:.3}
+
+    /* PAGES */
+    .page{display:none;min-height:100vh;animation:pgIn .55s var(--ease) both}
+    .page.active{display:block}
+    @keyframes pgIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 64px;height:72px;display:flex;align-items:center;justify-content:space-between;transition:background .4s,border .4s;border-bottom:1px solid transparent}
+    nav.solid{background:rgba(11,11,9,.97);border-color:var(--gold-line);backdrop-filter:blur(8px)}
+    .nav-logo{display:flex;align-items:center;gap:14px;cursor:pointer;text-decoration:none}
+    .nav-logo-text{font-family:'Tenor Sans',serif;font-size:1.05rem;letter-spacing:.35em;text-transform:uppercase;color:var(--white)}
+    .nav-links{display:flex;gap:36px;list-style:none;align-items:center}
+    .nav-links a{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .3s;position:relative}
+    .nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--gold);transition:width .3s}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold)}
+    .nav-links a:hover::after,.nav-links a.active::after{width:100%}
+    .nav-cta{border:1px solid var(--gold)!important;color:var(--gold)!important;padding:9px 26px!important;letter-spacing:.2em!important;font-size:.68rem!important;transition:all .3s!important}
+    .nav-cta:hover{background:var(--gold)!important;color:var(--ink)!important}
+    .nav-cta::after{display:none!important}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+    .hamburger span{display:block;width:22px;height:1px;background:var(--gold);transition:all .3s}
+    .m-menu{display:none;position:fixed;inset:0;background:rgba(11,11,9,.98);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+    .m-menu.open{display:flex;animation:pgIn .3s ease}
+    .m-menu a{font-family:'Cormorant',serif;font-size:2.2rem;color:var(--text);text-decoration:none;cursor:pointer;transition:color .3s;letter-spacing:.05em}
+    .m-menu a:hover{color:var(--gold)}
+    .m-close{position:absolute;top:22px;right:64px;background:none;border:none;font-size:1.8rem;color:var(--gold);cursor:pointer}
+
+    /* UTILS */
+    .lbl{font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:14px}
+    .h1{font-family:'Cormorant',serif;font-size:clamp(3rem,7vw,6.4rem);font-weight:300;line-height:.95;color:var(--white)}
+    .h1 em{font-style:italic;color:var(--gold)}
+    .h2{font-family:'Cormorant',serif;font-size:clamp(2rem,4.5vw,3.6rem);font-weight:300;line-height:1.05;color:var(--white)}
+    .h2 em{font-style:italic;color:var(--gold)}
+    .divider{width:48px;height:1px;background:linear-gradient(to right,var(--gold),transparent);margin:20px 0 40px}
+    .body-serif{font-family:'Cormorant',serif;font-size:1.12rem;line-height:1.9;color:var(--muted)}
+    .btn-g{display:inline-block;background:var(--gold);color:var(--ink);padding:15px 40px;font-family:'Jost',sans-serif;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;border:none;text-decoration:none;transition:all .3s}
+    .btn-g:hover{background:var(--gold-hi);transform:translateY(-2px);box-shadow:0 12px 40px rgba(191,155,48,.22)}
+    .btn-o{display:inline-block;background:transparent;color:var(--text);border:1px solid rgba(226,221,208,.2);padding:15px 40px;font-family:'Jost',sans-serif;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .3s}
+    .btn-o:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+    section{padding:110px 64px;max-width:1360px;margin:0 auto}
+
+    /* HERO */
+    #hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 65% 35%,rgba(191,155,48,.09) 0%,transparent 60%),radial-gradient(ellipse 40% 70% at 15% 75%,rgba(191,155,48,.04) 0%,transparent 55%),linear-gradient(155deg,#0B0B09 0%,#131210 55%,#080806 100%)}
+    .hero-tx{position:absolute;inset:0;opacity:.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px}
+    .vl{position:absolute;top:50%;width:1px;height:100px;background:linear-gradient(to bottom,transparent,rgba(191,155,48,.3),transparent);transform:translateY(-50%)}
+    .hero-inner{position:relative;z-index:2;text-align:center;padding:140px 24px 100px;max-width:980px}
+    .eyebrow{font-size:.62rem;letter-spacing:.55em;text-transform:uppercase;color:var(--gold);margin-bottom:32px;display:flex;align-items:center;justify-content:center;gap:16px;animation:rise .8s var(--ease) .1s both}
+    .eyebrow::before,.eyebrow::after{content:'';flex:0 0 30px;height:1px;background:var(--gold-lo)}
+    .h-title{animation:rise .8s var(--ease) .3s both}
+    .h-sub{font-family:'Cormorant',serif;font-size:clamp(1rem,2.2vw,1.4rem);color:var(--muted);max-width:560px;margin:28px auto 48px;line-height:1.8;animation:rise .8s var(--ease) .5s both}
+    .h-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:rise .8s var(--ease) .7s both}
+    .h-stats{display:flex;gap:64px;justify-content:center;flex-wrap:wrap;margin-top:80px;padding-top:48px;border-top:1px solid var(--faint);animation:rise .8s var(--ease) .9s both}
+    .stn{font-family:'Cormorant',serif;font-size:2.8rem;font-weight:300;color:var(--gold);display:block;line-height:1}
+    .stl{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-top:6px;display:block}
+    @keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+    /* MARQUEE */
+    .mq-wrap{background:var(--gold);overflow:hidden;padding:14px 0;white-space:nowrap}
+    .mq-track{display:inline-block;animation:ticker 28s linear infinite}
+    .mq-track span{font-family:'Tenor Sans',sans-serif;font-size:.72rem;letter-spacing:.35em;text-transform:uppercase;color:var(--ink);padding:0 36px}
+    .mq-track span::after{content:'◆';margin-left:36px;font-size:.5rem;opacity:.6}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* ABOUT */
+    .ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+    .ab-vis{position:relative}
+    .ab-card{aspect-ratio:4/5;background:var(--ink3);border:1px solid var(--gold-line);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .ab-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(191,155,48,.04) 0%,transparent 55%)}
+    .ab-cor{position:absolute;width:64px;height:64px}
+    .ab-cor.tl{top:-12px;left:-12px;border-top:1px solid var(--gold);border-left:1px solid var(--gold)}
+    .ab-cor.br{bottom:-12px;right:-12px;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold)}
+    .ab-badge{position:absolute;bottom:32px;right:-24px;background:var(--gold);color:var(--ink);padding:18px 24px;text-align:center}
+    .ab-badge strong{font-family:'Cormorant',serif;font-size:2.2rem;font-weight:400;display:block;line-height:1}
+    .ab-badge span{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase}
+    .ab-vals{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+    .av{padding:18px;border:1px solid var(--gold-line);background:var(--gold-bg);transition:border-color .3s}
+    .av:hover{border-color:rgba(191,155,48,.35)}
+    .av-t{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+    .av-d{font-size:.82rem;color:var(--muted);line-height:1.6}
+
+    /* SERVICES */
+    .svc-bg{background:var(--ink2)}
+    .svc-hdr{text-align:center;margin-bottom:72px}
+    .svc-hdr .divider{margin:20px auto 0}
+    /*
+    ╔══════════════════════════════════════╗
+    ║  ADD A NEW SERVICE:                  ║
+    ║  Copy one .svc block, paste inside   ║
+    ║  .svc-grid, update content.          ║
+    ║  No other code changes needed.       ║
+    ╚══════════════════════════════════════╝
+    */
+    .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2px;background:rgba(191,155,48,.07)}
+    .svc{background:var(--ink2);padding:52px 36px;position:relative;overflow:hidden;cursor:pointer;transition:background .35s}
+    .svc::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+    .svc:hover{background:var(--ink3)}
+    .svc:hover::before{transform:scaleX(1)}
+    .svc-n{font-family:'Cormorant',serif;font-size:5.5rem;font-weight:300;color:var(--gold);opacity:.05;position:absolute;top:12px;right:24px;line-height:1;user-select:none;transition:opacity .4s}
+    .svc:hover .svc-n{opacity:.1}
+    .svc-ic{width:48px;height:48px;border:1px solid rgba(191,155,48,.25);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:24px;transition:all .3s}
+    .svc:hover .svc-ic{border-color:var(--gold);background:var(--gold-bg)}
+    .svc-title{font-family:'Cormorant',serif;font-size:1.55rem;color:var(--white);margin-bottom:14px}
+    .svc-desc{font-size:.87rem;line-height:1.8;color:var(--muted);margin-bottom:28px}
+    .svc-list{list-style:none;margin-bottom:28px}
+    .svc-list li{font-size:.8rem;color:var(--muted);padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:10px}
+    .svc-list li::before{content:'—';color:var(--gold);font-size:.68rem;flex-shrink:0}
+    .svc-cta{font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:gap .3s;background:none;border:none}
+    .svc-cta:hover{gap:16px}
+
+    /* PROCESS */
+    .proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--gold-line);margin-top:64px}
+    .proc{background:var(--ink);padding:40px 28px;transition:background .3s}
+    .proc:hover{background:var(--ink2)}
+    .proc-n{font-family:'Cormorant',serif;font-size:3.5rem;font-weight:300;color:var(--gold);opacity:.15;display:block;line-height:1;margin-bottom:16px}
+    .proc-t{font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--white);margin-bottom:10px}
+    .proc-d{font-size:.82rem;color:var(--muted);line-height:1.7}
+
+    /* GALLERY */
+    .gal-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:48px;flex-wrap:wrap;gap:16px}
+    .gal-fs{display:flex;gap:8px;flex-wrap:wrap}
+    .gal-f{background:transparent;border:1px solid rgba(255,255,255,.09);color:var(--muted);padding:8px 18px;font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+    .gal-f.active,.gal-f:hover{border-color:var(--gold);color:var(--gold)}
+    .gal-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:3px}
+    .gi{position:relative;overflow:hidden;background:var(--ink3);border:1px solid rgba(191,155,48,.05);cursor:pointer}
+    .gi.w2{grid-column:span 2}.gi.t2{grid-row:span 2}
+    .gi-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.15;transition:all .5s;background:linear-gradient(135deg,rgba(191,155,48,.04) 0%,transparent 60%)}
+    .gi:hover .gi-in{opacity:.3;transform:scale(1.05)}
+    .gi-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(11,11,9,.88) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:18px}
+    .gi:hover .gi-ov{opacity:1}
+    .gi-cap{font-size:.75rem;color:var(--text);letter-spacing:.06em}
+    .upz{border:2px dashed rgba(191,155,48,.18);padding:44px;text-align:center;margin-top:28px;cursor:pointer;transition:border-color .3s}
+    .upz:hover{border-color:var(--gold)}
+    .upz-ic{font-size:1.8rem;color:var(--gold-lo);margin-bottom:10px;display:block}
+
+    /* LIGHTBOX */
+    .lb{display:none;position:fixed;inset:0;background:rgba(8,8,6,.97);z-index:10000;align-items:center;justify-content:center}
+    .lb.open{display:flex;animation:pgIn .3s ease}
+    .lb-x{position:absolute;top:20px;right:56px;background:none;border:none;font-size:2rem;color:var(--gold);cursor:pointer}
+    .lb-b{max-width:80vw;max-height:80vh;background:var(--ink3);padding:64px;display:flex;align-items:center;justify-content:center;font-size:5rem;opacity:.2}
+
+    /* TEAM */
+    .tm-bg{background:var(--ink2)}
+    .tm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px;background:rgba(191,155,48,.07)}
+    .tc{background:var(--ink2);overflow:hidden;transition:background .35s}
+    .tc:hover{background:var(--ink3)}
+    .tc-ph{aspect-ratio:3/4;background:var(--ink4);display:flex;align-items:center;justify-content:center;font-size:4rem;opacity:.2;transition:opacity .4s;position:relative}
+    .tc-ph::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(11,11,9,.5) 0%,transparent 45%)}
+    .tc:hover .tc-ph{opacity:.3}
+    .tc-info{padding:24px 24px 28px}
+    .tc-name{font-family:'Cormorant',serif;font-size:1.3rem;color:var(--white)}
+    .tc-role{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:4px 0 10px}
+    .tc-bio{font-size:.8rem;color:var(--muted);line-height:1.7}
+
+    /* CONTACT */
+    .ct-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px}
+    .cm{display:flex;gap:18px;align-items:flex-start;padding:20px;border:1px solid var(--gold-line);text-decoration:none;transition:border-color .3s}
+    .cm:hover{border-color:rgba(191,155,48,.35)}
+    .cm-ic{font-size:1.3rem;min-width:42px;height:42px;border:1px solid rgba(191,155,48,.2);display:flex;align-items:center;justify-content:center}
+    .cm-lbl{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+    .cm-val{font-size:.9rem;color:var(--text)}
+    .cm-hint{font-size:.75rem;color:var(--muted);margin-top:2px}
+    .cta-box{background:linear-gradient(135deg,rgba(191,155,48,.09) 0%,rgba(191,155,48,.03) 100%);border:1px solid rgba(191,155,48,.18);padding:52px 40px;display:flex;flex-direction:column;gap:20px}
+    .wa-btn{display:inline-flex;align-items:center;gap:12px;background:#25D366;color:#fff;padding:16px 30px;font-family:'Jost',sans-serif;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;transition:all .3s}
+    .wa-btn:hover{background:#1ebe5a;transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,211,102,.3)}
+
+    /* FOOTER */
+    footer{background:#080806;border-top:1px solid var(--gold-line);padding:60px 64px 28px}
+    .ft-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:44px}
+    .ft-name{font-family:'Tenor Sans',serif;font-size:.95rem;letter-spacing:.38em;text-transform:uppercase;color:var(--white);margin-top:14px;display:block}
+    .ft-tag{font-size:.82rem;color:var(--muted);line-height:1.75;max-width:260px;margin-top:10px}
+    .ft-col h4{font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+    .ft-col ul{list-style:none}
+    .ft-col li{margin-bottom:10px}
+    .ft-col a{font-size:.82rem;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .3s}
+    .ft-col a:hover{color:var(--gold)}
+    .ft-bot{border-top:1px solid rgba(255,255,255,.04);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .ft-cp{font-size:.72rem;color:var(--muted)}
+    .ft-cp span{color:var(--gold)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:36px;right:36px;background:var(--ink3);border:1px solid var(--gold);color:var(--text);padding:14px 22px;font-size:.82rem;z-index:9999;transform:translateY(60px);opacity:0;transition:all .4s;max-width:280px}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    /* RESPONSIVE */
+    @media(max-width:960px){
+      nav{padding:0 24px}
+      .nav-links{display:none}
+      .hamburger{display:flex}
+      section{padding:80px 24px}
+      .ab-grid,.ct-grid{grid-template-columns:1fr}
+      .ab-badge{right:0}
+      .proc-grid{grid-template-columns:1fr 1fr}
+      .gal-grid{grid-template-columns:repeat(2,1fr)}
+      .gi.w2{grid-column:span 1}
+      .ft-g{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:580px){
+      .h-stats{gap:32px}
+      .proc-grid{grid-template-columns:1fr}
+      .tm-grid{grid-template-columns:1fr 1fr}
+      .ft-g{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<!-- SVG LOGO DEFINITION (reused inline) -->
+<svg style="display:none" id="logo-defs">
+  <!-- nav size -->
+  <symbol id="logo-sm" viewBox="0 0 36 36">
+    <polygon points="18,2 33,10 33,26 18,34 3,26 3,10" fill="none" stroke="#BF9B30" stroke-width="1.2"/>
+    <polygon points="18,7 28,12.5 28,23.5 18,29 8,23.5 8,12.5" fill="none" stroke="#BF9B30" stroke-width="0.6" opacity="0.4"/>
+    <text x="18" y="22" text-anchor="middle" font-family="Tenor Sans, serif" font-size="9" fill="#BF9B30" letter-spacing="1">EV</text>
+  </symbol>
+  <!-- hero size -->
+  <symbol id="logo-lg" viewBox="0 0 90 90">
+    <polygon points="45,4 80,22.5 80,67.5 45,86 10,67.5 10,22.5" fill="none" stroke="#BF9B30" stroke-width="1.4"/>
+    <polygon points="45,14 70,28 70,62 45,76 20,62 20,28" fill="none" stroke="#BF9B30" stroke-width="0.7" opacity="0.35"/>
+    <polygon points="45,4 49,10 45,16 41,10" fill="#BF9B30" opacity="0.9"/>
+    <polygon points="80,22.5 80,29.5 74,26 77,19.5" fill="#BF9B30" opacity="0.6"/>
+    <polygon points="80,67.5 77,70.5 74,64 80,60.5" fill="#BF9B30" opacity="0.6"/>
+    <polygon points="45,86 41,80 45,74 49,80" fill="#BF9B30" opacity="0.9"/>
+    <polygon points="10,67.5 10,60.5 16,64 13,70.5" fill="#BF9B30" opacity="0.6"/>
+    <polygon points="10,22.5 13,19.5 16,26 10,29.5" fill="#BF9B30" opacity="0.6"/>
+    <line x1="45" y1="14" x2="45" y2="76" stroke="#BF9B30" stroke-width="0.4" opacity="0.2"/>
+    <line x1="20" y1="28" x2="70" y2="62" stroke="#BF9B30" stroke-width="0.4" opacity="0.2"/>
+    <line x1="70" y1="28" x2="20" y2="62" stroke="#BF9B30" stroke-width="0.4" opacity="0.2"/>
+    <text x="45" y="53" text-anchor="middle" font-family="Cormorant, serif" font-size="22" fill="#BF9B30" font-weight="300" letter-spacing="2" opacity="0.95">E</text>
+  </symbol>
+</svg>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" onclick="go('home')">
+    <svg width="36" height="36"><use href="#logo-sm"/></svg>
+    <span class="nav-logo-text">Everlasting</span>
+  </a>
+  <ul class="nav-links">
+    <li><a onclick="go('home')" data-p="home">Home</a></li>
+    <li><a onclick="go('about')" data-p="about">About</a></li>
+    <li><a onclick="go('services')" data-p="services">Services</a></li>
+    <li><a onclick="go('gallery')" data-p="gallery">Gallery</a></li>
+    <li><a onclick="go('team')" data-p="team">Our Team</a></li>
+    <li><a onclick="go('contact')" data-p="contact" class="nav-cta">Hire Us</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleM()"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="m-menu" id="mmenu">
+  <button class="m-close" onclick="toggleM()">✕</button>
+  <a onclick="go('home');toggleM()">Home</a>
+  <a onclick="go('about');toggleM()">About</a>
+  <a onclick="go('services');toggleM()">Services</a>
+  <a onclick="go('gallery');toggleM()">Gallery</a>
+  <a onclick="go('team');toggleM()">Our Team</a>
+  <a onclick="go('contact');toggleM()">Hire Us</a>
+</div>
+
+<!-- ========== HOME ========== -->
+<div id="home-page" class="page active">
+
+  <div id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-tx"></div>
+    <div class="vl" style="left:64px"></div>
+    <div class="vl" style="right:64px"></div>
+    <div class="hero-inner">
+      <div class="eyebrow">Premium Event Management</div>
+      <div style="margin-bottom:32px;display:flex;justify-content:center;animation:rise .8s var(--ease) .2s both">
+        <svg width="90" height="90"><use href="#logo-lg"/></svg>
+      </div>
+      <h1 class="h1 h-title">We Manage<br><em>Events That</em><br>Live Forever</h1>
+      <p class="h-sub">From intimate gatherings to grand productions — your vision, our expertise, flawless execution. Hire a team that makes every detail unforgettable.</p>
+      <div class="h-btns">
+        <button class="btn-g" onclick="go('contact')">Hire Our Team</button>
+        <button class="btn-o" onclick="go('services')">Our Services</button>
+      </div>
+      <div class="h-stats">
+        <div><span class="stn">250+</span><span class="stl">Events Executed</span></div>
+        <div><span class="stn">8+</span><span class="stl">Years Active</span></div>
+        <div><span class="stn">98%</span><span class="stl">Client Satisfaction</span></div>
+        <div><span class="stn">4</span><span class="stl">Event Categories</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mq-wrap"><div class="mq-track"><span>Weddings</span><span>Corporate Events</span><span>Birthdays</span><span>Private Parties</span><span>Gala Dinners</span><span>Product Launches</span><span>Anniversaries</span><span>Luxury Events</span><span>Weddings</span><span>Corporate Events</span><span>Birthdays</span><span>Private Parties</span><span>Gala Dinners</span><span>Product Launches</span><span>Anniversaries</span><span>Luxury Events</span></div></div>
+
+  <section>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
+      <div>
+        <span class="lbl">What We Do</span>
+        <h2 class="h2">Your event.<br><em>Our obsession.</em></h2>
+        <div class="divider"></div>
+        <p class="body-serif">We are not a platform or an app. We are a <strong style="color:var(--text);font-weight:400">real team of event professionals</strong> who show up, set up, and deliver. You bring the occasion — we bring the expertise, the crew, and the execution.</p>
+        <p class="body-serif" style="margin-top:16px">Whether you are planning a wedding, a corporate gala, or a private celebration, our job is to handle every single moving part so you don't have to.</p>
+        <button class="btn-o" onclick="go('services')" style="margin-top:32px">See How We Work →</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--gold-line)">
+        <div onclick="go('services')" style="background:var(--ink2);padding:36px 28px;cursor:pointer;transition:background .3s" onmouseover="this.style.background='var(--ink3)'" onmouseout="this.style.background='var(--ink2)'">
+          <div style="font-size:1.6rem;margin-bottom:12px">💍</div>
+          <div style="font-family:'Cormorant',serif;font-size:1.2rem;color:var(--white);margin-bottom:6px">Weddings</div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.6">End-to-end management for the most important day of your life.</div>
+        </div>
+        <div onclick="go('services')" style="background:var(--ink2);padding:36px 28px;cursor:pointer;transition:background .3s" onmouseover="this.style.background='var(--ink3)'" onmouseout="this.style.background='var(--ink2)'">
+          <div style="font-size:1.6rem;margin-bottom:12px">🏛️</div>
+          <div style="font-family:'Cormorant',serif;font-size:1.2rem;color:var(--white);margin-bottom:6px">Corporate</div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.6">Galas, launches, team events — executed with precision.</div>
+        </div>
+        <div onclick="go('services')" style="background:var(--ink2);padding:36px 28px;cursor:pointer;transition:background .3s" onmouseover="this.style.background='var(--ink3)'" onmouseout="this.style.background='var(--ink2)'">
+          <div style="font-size:1.6rem;margin-bottom:12px">🎂</div>
+          <div style="font-family:'Cormorant',serif;font-size:1.2rem;color:var(--white);margin-bottom:6px">Celebrations</div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.6">Birthdays, milestones, and private parties done right.</div>
+        </div>
+        <div onclick="go('gallery')" style="background:var(--gold-bg);border:1px solid var(--gold-line);padding:36px 28px;cursor:pointer;display:flex;align-items:flex-end">
+          <span style="font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold)">See Our Work →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="background:linear-gradient(135deg,rgba(191,155,48,.1) 0%,rgba(191,155,48,.03) 100%);border-top:1px solid var(--gold-line);border-bottom:1px solid var(--gold-line);padding:80px 64px;text-align:center">
+    <span class="lbl" style="display:block;text-align:center">Ready to Get Started?</span>
+    <h2 class="h2" style="max-width:560px;margin:12px auto 20px">Let's plan something <em>extraordinary</em> together</h2>
+    <p style="color:var(--muted);max-width:440px;margin:0 auto 36px;font-size:.9rem;line-height:1.75">Tell us about your event. We'll take it from there — concept, coordination, and flawless delivery.</p>
+    <button class="btn-g" onclick="go('contact')">Get In Touch →</button>
+  </div>
+
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management for weddings, corporate events &amp; private celebrations.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('about')">About Us</a></li><li><a onclick="go('services')">Services</a></li><li><a onclick="go('gallery')">Gallery</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('team')">Our Team</a></li><li><a onclick="go('contact')">Contact Us</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li><li><a href="tel:+918679261009">+91 86792 61009</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p><p class="ft-cp" style="font-size:.68rem">Hosted on GitHub Pages</p></div>
+  </footer>
+</div>
+
+
+<!-- ========== ABOUT ========== -->
+<div id="about-page" class="page">
+  <section>
+    <div style="height:60px"></div>
+    <div class="ab-grid">
+      <div class="ab-vis">
+        <div class="ab-card" style="font-size:4rem;opacity:.12;color:var(--gold)">
+          <!-- Replace with: <img src="about.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" alt="Everlasting Team"> -->
+          ✦
+        </div>
+        <div class="ab-cor tl"></div>
+        <div class="ab-cor br"></div>
+        <div class="ab-badge"><strong>8+</strong><span>Years of<br>Excellence</span></div>
+      </div>
+      <div>
+        <span class="lbl">Who We Are</span>
+        <h2 class="h2">We don't just plan.<br><em>We create memories.</em></h2>
+        <div class="divider"></div>
+        <p class="body-serif"><strong style="color:var(--text);font-weight:400">Everlasting</strong> is a full-service event management company. We were built for one purpose: to take every element of your event off your plate and deliver something extraordinary.</p>
+        <p class="body-serif" style="margin-top:16px">Over 8 years, we've worked on weddings, galas, product launches, and private parties across the region. Every event is different — and that's exactly what keeps us sharp.</p>
+        <p class="body-serif" style="margin-top:16px">When you hire us, you're not getting a vendor. You're getting a <strong style="color:var(--text);font-weight:400">dedicated team</strong> that is as invested in your event as you are.</p>
+        <div class="ab-vals">
+          <div class="av"><div class="av-t">Precision</div><div class="av-d">Every detail planned, every contingency covered.</div></div>
+          <div class="av"><div class="av-t">Passion</div><div class="av-d">We genuinely love what we do — it shows.</div></div>
+          <div class="av"><div class="av-t">Creativity</div><div class="av-d">Fresh ideas tailored to your vision.</div></div>
+          <div class="av"><div class="av-t">Reliability</div><div class="av-d">Show up. Deliver. Every single time.</div></div>
+        </div>
+        <button class="btn-g" onclick="go('contact')" style="margin-top:36px">Work With Us</button>
+      </div>
+    </div>
+  </section>
+  <div style="background:var(--ink2);border-top:1px solid var(--gold-line);padding:80px 64px;text-align:center">
+    <blockquote style="font-family:'Cormorant',serif;font-size:clamp(1.3rem,3vw,2rem);color:var(--text);font-style:italic;max-width:760px;margin:0 auto;line-height:1.65;font-weight:300">"Every occasion deserves to be treated as a masterpiece — and we don't leave until it is."</blockquote>
+  </div>
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management across all occasions.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('services')">Services</a></li><li><a onclick="go('gallery')">Gallery</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('team')">Our Team</a></li><li><a onclick="go('contact')">Contact</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p></div>
+  </footer>
+</div>
+
+
+<!-- ========== SERVICES ========== -->
+<div id="services-page" class="page svc-bg">
+  <div style="max-width:1360px;margin:0 auto;padding:110px 64px">
+    <div style="height:60px"></div>
+    <div class="svc-hdr">
+      <span class="lbl" style="display:block;text-align:center">What We Offer</span>
+      <h2 class="h2" style="text-align:center">Our <em>Services</em></h2>
+      <div class="divider" style="margin:20px auto 0"></div>
+      <p class="body-serif" style="max-width:520px;margin:20px auto 0;text-align:center">We handle every event with a dedicated on-ground team, precise coordination, and a commitment to excellence.</p>
+    </div>
+
+    <div class="svc-grid">
+
+      <div class="svc" onclick="go('contact')">
+        <span class="svc-n">01</span>
+        <div class="svc-ic">📋</div>
+        <h3 class="svc-title">Event RSVP & Guest Management</h3>
+        <p class="svc-desc">We handle all guest coordination — invitations, confirmations, seating plans, and day-of check-ins. You focus on enjoying your event.</p>
+        <ul class="svc-list">
+          <li>Digital &amp; physical invitation management</li>
+          <li>Guest list tracking &amp; RSVP collection</li>
+          <li>Seating &amp; table arrangement</li>
+          <li>Day-of welcome &amp; registration desk</li>
+          <li>Follow-up &amp; guest communication</li>
+        </ul>
+        <button class="svc-cta">Enquire About This →</button>
+      </div>
+
+      <div class="svc" onclick="go('contact')">
+        <span class="svc-n">02</span>
+        <div class="svc-ic">💍</div>
+        <h3 class="svc-title">Wedding Management</h3>
+        <p class="svc-desc">Complete end-to-end wedding planning and execution. We handle every detail from the first consultation to the final farewell.</p>
+        <ul class="svc-list">
+          <li>Venue sourcing &amp; decoration</li>
+          <li>Vendor coordination</li>
+          <li>Day-of timeline &amp; logistics</li>
+          <li>Guest experience &amp; hospitality</li>
+          <li>Budget management &amp; on-site team</li>
+        </ul>
+        <button class="svc-cta">Plan Your Wedding →</button>
+      </div>
+
+      <div class="svc" onclick="go('contact')">
+        <span class="svc-n">03</span>
+        <div class="svc-ic">🏛️</div>
+        <h3 class="svc-title">Corporate Events</h3>
+        <p class="svc-desc">From annual galas to product launches — executed with professionalism, precision, and a polished finish.</p>
+        <ul class="svc-list">
+          <li>Conference &amp; summit management</li>
+          <li>Product launch events</li>
+          <li>Annual day &amp; awards ceremonies</li>
+          <li>Team-building &amp; off-site events</li>
+          <li>Stage, AV &amp; technical coordination</li>
+        </ul>
+        <button class="svc-cta">Discuss Your Event →</button>
+      </div>
+
+      <div class="svc" onclick="go('contact')">
+        <span class="svc-n">04</span>
+        <div class="svc-ic">🎂</div>
+        <h3 class="svc-title">Birthdays & Private Parties</h3>
+        <p class="svc-desc">Milestone birthdays, anniversary dinners, or intimate gatherings — we bring your personal celebration vision to life.</p>
+        <ul class="svc-list">
+          <li>Theme design &amp; décor setup</li>
+          <li>Entertainment booking</li>
+          <li>Catering coordination</li>
+          <li>Photography &amp; videography</li>
+          <li>Full on-ground team management</li>
+        </ul>
+        <button class="svc-cta">Plan Your Party →</button>
+      </div>
+
+      <!--
+      ╔══════════════════════════════════════╗
+      ║  ADD A NEW SERVICE BELOW THIS LINE   ║
+      ║  Copy a .svc block above, paste      ║
+      ║  here, update number + content.      ║
+      ╚══════════════════════════════════════╝
+      -->
+
+    </div>
+
+    <div style="margin-top:100px">
+      <div style="text-align:center;margin-bottom:16px"><span class="lbl" style="display:inline-block">How We Work</span></div>
+      <h2 class="h2" style="text-align:center;margin-bottom:0">From first call to <em>final applause</em></h2>
+      <div class="proc-grid">
+        <div class="proc"><span class="proc-n">01</span><div class="proc-t">Consultation</div><div class="proc-d">We learn your vision, requirements, and budget. No templates — every event understood from scratch.</div></div>
+        <div class="proc"><span class="proc-n">02</span><div class="proc-t">Proposal & Planning</div><div class="proc-d">Detailed event plan — venues, vendors, timelines, budget breakdown — for your approval.</div></div>
+        <div class="proc"><span class="proc-n">03</span><div class="proc-t">Coordination</div><div class="proc-d">Our team handles every vendor, booking, and logistics conversation so you don't have to.</div></div>
+        <div class="proc"><span class="proc-n">04</span><div class="proc-t">Execution</div><div class="proc-d">On the day, our crew is on-ground managing every detail. You relax and enjoy your event.</div></div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management across all occasions.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('about')">About</a></li><li><a onclick="go('gallery')">Gallery</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('team')">Our Team</a></li><li><a onclick="go('contact')">Contact</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p></div>
+  </footer>
+</div>
+
+
+<!-- ========== GALLERY ========== -->
+<div id="gallery-page" class="page">
+  <section>
+    <div style="height:60px"></div>
+    <div class="gal-hdr">
+      <div><span class="lbl">Our Portfolio</span><h2 class="h2">Event <em>Gallery</em></h2></div>
+      <div class="gal-fs">
+        <button class="gal-f active" onclick="galF(this,'all')">All Events</button>
+        <button class="gal-f" onclick="galF(this,'wedding')">Weddings</button>
+        <button class="gal-f" onclick="galF(this,'corp')">Corporate</button>
+        <button class="gal-f" onclick="galF(this,'bday')">Celebrations</button>
+      </div>
+    </div>
+    <!-- Replace .gi-in divs with <img src="..."> tags when photos are ready -->
+    <div class="gal-grid" id="gg">
+      <div class="gi w2" data-cat="wedding" onclick="openLB(this)"><div class="gi-in">🌸</div><div class="gi-ov"><span class="gi-cap">Royal Wedding — 2024</span></div></div>
+      <div class="gi t2" data-cat="corp" onclick="openLB(this)"><div class="gi-in">🏛️</div><div class="gi-ov"><span class="gi-cap">Annual Gala — 2024</span></div></div>
+      <div class="gi" data-cat="bday" onclick="openLB(this)"><div class="gi-in">🎂</div><div class="gi-ov"><span class="gi-cap">50th Birthday — 2024</span></div></div>
+      <div class="gi" data-cat="wedding" onclick="openLB(this)"><div class="gi-in">💍</div><div class="gi-ov"><span class="gi-cap">Destination Wedding — 2023</span></div></div>
+      <div class="gi w2" data-cat="bday" onclick="openLB(this)"><div class="gi-in">✨</div><div class="gi-ov"><span class="gi-cap">Milestone Celebration — 2023</span></div></div>
+      <div class="gi" data-cat="corp" onclick="openLB(this)"><div class="gi-in">🤝</div><div class="gi-ov"><span class="gi-cap">Product Launch — 2023</span></div></div>
+      <div class="gi" data-cat="wedding" onclick="openLB(this)"><div class="gi-in">🕊️</div><div class="gi-ov"><span class="gi-cap">Garden Wedding — 2022</span></div></div>
+    </div>
+    <div class="upz" id="uz" onclick="document.getElementById('fi').click()">
+      <span class="upz-ic">📤</span>
+      <p><strong style="color:var(--gold)">Upload Event Photos</strong></p>
+      <p style="margin-top:6px;font-size:.78rem;color:var(--muted)">Click to browse or drag &amp; drop · JPG / PNG</p>
+      <input type="file" id="fi" multiple accept="image/*" style="display:none" onchange="doUp(event)"/>
+    </div>
+    <div id="ugrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:3px"></div>
+  </section>
+  <div class="lb" id="lb"><button class="lb-x" onclick="closeLB()">✕</button><div class="lb-b" id="lbb">📸</div></div>
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management across all occasions.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('about')">About</a></li><li><a onclick="go('services')">Services</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('team')">Our Team</a></li><li><a onclick="go('contact')">Contact</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p></div>
+  </footer>
+</div>
+
+
+<!-- ========== TEAM ========== -->
+<div id="team-page" class="page tm-bg">
+  <div style="max-width:1360px;margin:0 auto;padding:110px 64px">
+    <div style="height:60px"></div>
+    <div style="text-align:center;margin-bottom:72px">
+      <span class="lbl" style="display:block;text-align:center">The People Behind the Magic</span>
+      <h2 class="h2" style="text-align:center">Meet Our <em>Team</em></h2>
+      <div class="divider" style="margin:20px auto"></div>
+      <p class="body-serif" style="max-width:500px;margin:0 auto;text-align:center">A tight-knit team of professionals who live for the moments we create together.</p>
+    </div>
+    <div class="tm-grid">
+      <!--
+        HOW TO ADD TEAM PHOTOS:
+        Replace the emoji div inside .tc-ph with:
+        <img src="name.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1" alt="Name">
+        and set .tc-ph font-size to 0 or remove the emoji
+      -->
+      <div class="tc">
+        <div class="tc-ph">👤</div>
+        <div class="tc-info">
+          <div class="tc-name">Your Name Here</div>
+          <div class="tc-role">Founder & Event Director</div>
+          <div class="tc-bio">Visionary behind Everlasting. 8+ years crafting extraordinary celebrations — from intimate dinners to grand weddings.</div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-ph">👤</div>
+        <div class="tc-info">
+          <div class="tc-name">Team Member 2</div>
+          <div class="tc-role">Creative Director</div>
+          <div class="tc-bio">Turns concepts into breathtaking environments. Expert in décor, lighting, and spatial design.</div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-ph">👤</div>
+        <div class="tc-info">
+          <div class="tc-name">Team Member 3</div>
+          <div class="tc-role">Operations Manager</div>
+          <div class="tc-bio">The backbone of every event. Flawless logistics, vendor coordination, and day-of execution.</div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="tc-ph">👤</div>
+        <div class="tc-info">
+          <div class="tc-name">Team Member 4</div>
+          <div class="tc-role">Client Relations</div>
+          <div class="tc-bio">Your dedicated point of contact from first conversation to final debrief. Always available, always attentive.</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:64px">
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:20px">Interested in joining the Everlasting team?</p>
+      <a href="https://wa.me/918679261009?text=Hi%2C+I%27m+interested+in+joining+the+Everlasting+Events+team." target="_blank" class="btn-o">Reach Out on WhatsApp →</a>
+    </div>
+  </div>
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management across all occasions.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('about')">About</a></li><li><a onclick="go('services')">Services</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('gallery')">Gallery</a></li><li><a onclick="go('contact')">Contact</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p></div>
+  </footer>
+</div>
+
+
+<!-- ========== CONTACT ========== -->
+<div id="contact-page" class="page">
+  <section>
+    <div style="height:60px"></div>
+    <div class="ct-grid">
+      <div>
+        <span class="lbl">Get In Touch</span>
+        <h2 class="h2">Tell us about<br>your <em>event.</em></h2>
+        <div class="divider"></div>
+        <p class="body-serif">We'd love to hear what you're planning. Whether it's a wedding in six months or a corporate event next week — reach out and let's talk. Our team responds within a few hours.</p>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:40px">
+          <a class="cm" href="https://wa.me/918679261009?text=Hi%20Everlasting%20Events!%20I%20want%20to%20discuss%20an%20upcoming%20event." target="_blank">
+            <div class="cm-ic">💬</div>
+            <div><div class="cm-lbl">WhatsApp — Fastest</div><div class="cm-val">+91 86792 61009</div><div class="cm-hint">Message us directly — we reply fast →</div></div>
+          </a>
+          <a class="cm" href="tel:+918679261009">
+            <div class="cm-ic">📞</div>
+            <div><div class="cm-lbl">Call Us</div><div class="cm-val">+91 86792 61009</div><div class="cm-hint">Mon–Sun, 9 AM – 9 PM IST</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="cta-box">
+        <span class="lbl" style="margin:0">Start the Conversation</span>
+        <h3 style="font-family:'Cormorant',serif;font-size:1.9rem;color:var(--white);line-height:1.15">The easiest way to hire us is a simple WhatsApp message.</h3>
+        <p style="font-size:.88rem;color:var(--muted);line-height:1.8">No forms. No waiting. Just tell us your event type, date, and rough idea — and we'll get back to you with exactly how we can help.</p>
+        <a class="wa-btn" href="https://wa.me/918679261009?text=Hi%20Everlasting%20Events!%20I%27d%20like%20to%20discuss%20hiring%20your%20team%20for%20an%20upcoming%20event." target="_blank">
+          <span style="font-size:1.1rem">✉</span> Chat on WhatsApp
+        </a>
+        <div style="border-top:1px solid var(--gold-line);padding-top:20px;width:100%">
+          <p style="font-size:.75rem;color:var(--muted)">You can also browse our work before reaching out.</p>
+          <button onclick="go('gallery')" style="margin-top:10px;background:none;border:none;color:var(--gold);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer">View Gallery →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer>
+    <div class="ft-g">
+      <div><svg width="32" height="32"><use href="#logo-sm"/></svg><span class="ft-name">Everlasting</span><p class="ft-tag">Premium event management across all occasions.</p></div>
+      <div class="ft-col"><h4>Navigate</h4><ul><li><a onclick="go('home')">Home</a></li><li><a onclick="go('about')">About</a></li><li><a onclick="go('services')">Services</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a onclick="go('team')">Our Team</a></li><li><a onclick="go('gallery')">Gallery</a></li></ul></div>
+      <div class="ft-col"><h4>Connect</h4><ul><li><a href="https://wa.me/918679261009" target="_blank">WhatsApp</a></li><li><a href="tel:+918679261009">Call Us</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p class="ft-cp">© 2025 <span>Everlasting Events</span>. All rights reserved.</p></div>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // CURSOR
+  const c1=document.getElementById('cur'),c2=document.getElementById('cur2');
+  document.addEventListener('mousemove',e=>{
+    c1.style.left=e.clientX+'px';c1.style.top=e.clientY+'px';
+    c2.style.left=e.clientX+'px';c2.style.top=e.clientY+'px';
+  });
+  document.addEventListener('mouseover',e=>{
+    document.body.classList.toggle('hov',!!e.target.closest('a,button,[onclick]'));
+  });
+
+  // SCROLL NAV
+  window.addEventListener('scroll',()=>{
+    document.getElementById('nav').classList.toggle('solid',scrollY>50);
+  });
+
+  // ROUTER
+  const PG=['home','about','services','gallery','team','contact'];
+  function go(id){
+    PG.forEach(p=>document.getElementById(p+'-page').classList.remove('active'));
+    document.getElementById(id+'-page').classList.add('active');
+    document.querySelectorAll('.nav-links a[data-p]').forEach(a=>a.classList.toggle('active',a.dataset.p===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // MOBILE MENU
+  function toggleM(){document.getElementById('mmenu').classList.toggle('open')}
+
+  // GALLERY FILTER
+  function galF(btn,cat){
+    document.querySelectorAll('.gal-f').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#gg .gi').forEach(i=>{
+      const s=cat==='all'||i.dataset.cat===cat;
+      i.style.display=s?'':'none';
+      if(s)i.style.animation='pgIn .4s ease both';
+    });
+  }
+
+  // LIGHTBOX
+  function openLB(el){
+    const cap=el.querySelector('.gi-cap');
+    document.getElementById('lbb').textContent=cap?cap.textContent:'📸';
+    document.getElementById('lb').classList.add('open');
+  }
+  function closeLB(){document.getElementById('lb').classList.remove('open')}
+  document.getElementById('lb').addEventListener('click',function(e){if(e.target===this)closeLB()});
+
+  // UPLOAD
+  function doUp(e){
+    const files=Array.from(e.target.files);
+    const grid=document.getElementById('ugrid');
+    files.forEach(f=>{
+      const r=new FileReader();
+      r.onload=ev=>{
+        const d=document.createElement('div');
+        d.className='gi';d.style.height='220px';
+        d.innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover" alt="${f.name}"><div class="gi-ov" style="opacity:1"><span class="gi-cap">${f.name.replace(/\.[^.]+$/,'')}</span></div>`;
+        grid.appendChild(d);
+      };
+      r.readAsDataURL(f);
+    });
+    showT(`✓ ${files.length} photo${files.length>1?'s':''} added`);
+  }
+  const uz=document.getElementById('uz');
+  uz.addEventListener('dragover',e=>{e.preventDefault();uz.style.borderColor='var(--gold)'});
+  uz.addEventListener('dragleave',()=>uz.style.borderColor='');
+  uz.addEventListener('drop',e=>{
+    e.preventDefault();uz.style.borderColor='';
+    const dt=new DataTransfer();
+    Array.from(e.dataTransfer.files).forEach(f=>dt.items.add(f));
+    document.getElementById('fi').files=dt.files;
+    doUp({target:document.getElementById('fi')});
+  });
+
+  // TOAST
+  function showT(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3200);
+  }
+</script>
+</body>
+</html>
